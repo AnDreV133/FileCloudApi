@@ -1,5 +1,6 @@
 package com.dmitr.api.controller
 
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -7,12 +8,12 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/auth")
 class AuthController {
 
-    @RequestMapping("sign-up")
+    @PostMapping("/sign-up")
     fun signUp(): String {
         return "sign-up"
     }
 
-    @RequestMapping("sign-in")
+    @PostMapping("/sign-in")
     fun signIn(): String {
         return "sign-in"
     }

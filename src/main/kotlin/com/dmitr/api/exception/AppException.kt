@@ -3,7 +3,7 @@ package com.dmitr.api.exception
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus
 
-sealed class AppException(message: String) : Exception(message)
+sealed class AppException(message: String) : RuntimeException(message)
 
 @ResponseStatus(value = HttpStatus.CONFLICT, reason = "User is already exists")
 class UserAvailableException(message: String = "") : AppException(message)
