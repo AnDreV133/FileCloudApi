@@ -8,7 +8,7 @@ import jakarta.persistence.*
 @Entity
 class UserEntity(
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = -1,
     override val login: String,
     val name: String,

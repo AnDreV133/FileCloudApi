@@ -6,7 +6,7 @@ import com.dmitr.api.entity.SubscriptionLevelEnum
 import com.dmitr.api.entity.TokenPairEntity
 import com.dmitr.api.entity.UserEntity
 import com.dmitr.api.exception.UserAvailableException
-import com.dmitr.api.repository.TokenRepository
+import com.dmitr.api.repository.TokenPairRepository
 import com.dmitr.api.repository.UserRepository
 import com.dmitr.api.util.CustomUserDetails
 import jakarta.transaction.Transactional
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service
 @Service
 class UserService(
     private val userRepository: UserRepository,
-    private val tokenRepository: TokenRepository,
+    private val tokenPairRepository: TokenPairRepository,
     private val jwtRefreshService: JwtRefreshService,
     private val jwtAccessService: JwtAccessService,
 ) : UserDetailsService {
@@ -48,11 +48,10 @@ class UserService(
 
         newUser = userRepository.save(newUser)
 
-        val tokenRefresh = jwtRefreshService.generateToken(newUser)
-        val tokenAccess = jwtAccessService.generateToken()
+        val tokenRefresh = jwtRefreshService.generateToken()
+        val tokenAccess = jwtAccessService.generateToken(newUser)
 
         val newTokenPair = TokenPairEntity(
-            user = newUser,
             tokenRefresh = tokenRefresh,
             tokenAccess = tokenAccess,
         )

@@ -5,7 +5,7 @@ import jakarta.persistence.*
 @Entity
 class FileEntity(
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = -1,
     @ManyToOne
     val user: UserEntity,

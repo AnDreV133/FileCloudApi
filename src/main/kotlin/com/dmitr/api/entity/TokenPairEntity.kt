@@ -1,14 +1,12 @@
 package com.dmitr.api.entity
 
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.OneToOne
+import jakarta.persistence.*
 
 @Entity
 class TokenPairEntity(
     @Id
-    @OneToOne
-    val user: UserEntity,
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = -1,
     val tokenRefresh: String,
     val tokenAccess: String,
 )
