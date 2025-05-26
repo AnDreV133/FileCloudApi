@@ -18,6 +18,10 @@ import java.security.SignatureException
 class JwtRequestFilter(
     private val jwtAccessService: JwtAccessService,
 ) : OncePerRequestFilter() {
+    override fun shouldNotFilter(request: HttpServletRequest): Boolean {
+        return request.servletPath.startsWith("/auth")
+    }
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
