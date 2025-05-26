@@ -1,6 +1,7 @@
 package com.dmitr.api.config
 
 import com.dmitr.api.service.UserService
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -24,12 +25,20 @@ class SecurityConfig(
     private var jwtRequestFilter: JwtRequestFilter,
     private val exceptionHandlingFilter: ExceptionHandlingFilter,
 ) {
+
+    @Value("\${server.servlet.context-path}")
+    private lateinit var contextPath: String
+
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain = http
         .csrf { it.disable() }
         .exceptionHandling { it.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) }
         .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
         .authenticationProvider(authenticationProvider())
+        .authorizeHttpRequests {
+            it.requestMatchers("$contextPath/auth/**").permitAll()
+            it.anyRequest().authenticated()
+        }
         .addFilterBefore(exceptionHandlingFilter, LogoutFilter::class.java)
         .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter::class.java)
         .build()
