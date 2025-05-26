@@ -3,10 +3,10 @@ package com.dmitr.api.entity
 import jakarta.persistence.*
 
 @Entity
-data class FileEntity(
+class FileEntity(
     @Id
     @GeneratedValue
-    val id: Long,
+    val id: Long = -1,
     @ManyToOne
     val user: UserEntity,
     val name: String,

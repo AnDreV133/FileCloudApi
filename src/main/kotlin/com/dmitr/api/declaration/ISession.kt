@@ -1,4 +1,4 @@
-package com.dmitr.api.dto
+package com.dmitr.api.declaration
 
 interface ISession {
     val session: String

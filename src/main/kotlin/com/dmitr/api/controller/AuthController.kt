@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.RestController
 class AuthController {
 
     @RequestMapping("sign-up")
-    fun signUp() {
-
+    fun signUp(): String {
+        return "sign-up"
     }
 
     @RequestMapping("sign-in")
-    fun signIn() {
-
+    fun signIn(): String {
+        return "sign-in"
     }
 }

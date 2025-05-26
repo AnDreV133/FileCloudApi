@@ -1,15 +1,18 @@
 package com.dmitr.api.entity
 
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.Id
+import com.dmitr.api.declaration.ILogin
+import com.dmitr.api.declaration.IPassword
+import com.dmitr.api.declaration.ISubscriptionLevel
+import jakarta.persistence.*
 
 @Entity
-data class UserEntity(
+class UserEntity(
     @Id
     @GeneratedValue
-    val id: Long,
-    val login: String,
+    val id: Long = -1,
+    override val login: String,
     val name: String,
-    val password: String
-)
+    override val password: String,
+    @Enumerated(EnumType.STRING)
+    override val subscriptionLevel: SubscriptionLevelEnum
+) : ILogin, IPassword, ISubscriptionLevel
