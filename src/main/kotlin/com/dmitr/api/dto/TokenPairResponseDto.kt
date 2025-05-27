@@ -1,6 +1,6 @@
 package com.dmitr.api.dto
 
-data class TokenSessionResponseDto(
+data class TokenPairResponseDto(
     val tokenRefresh: String,
     val tokenAccess: String,
 )

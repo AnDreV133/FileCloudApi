@@ -1,11 +1,14 @@
 package com.dmitr.api.service
 
-import com.dmitr.api.dto.TokenSessionResponseDto
+import com.dmitr.api.declaration.ILogin
+import com.dmitr.api.declaration.ISubscriptionLevel
+import com.dmitr.api.dto.TokenPairResponseDto
 import com.dmitr.api.dto.UserAuthDto
 import com.dmitr.api.entity.SubscriptionLevelEnum
 import com.dmitr.api.entity.TokenPairEntity
 import com.dmitr.api.entity.UserEntity
 import com.dmitr.api.exception.UserAvailableException
+import com.dmitr.api.exception.UserNotFoundException
 import com.dmitr.api.repository.TokenPairRepository
 import com.dmitr.api.repository.UserRepository
 import com.dmitr.api.util.CustomUserDetails
@@ -23,18 +26,16 @@ class UserService(
     private val jwtAccessService: JwtAccessService,
 ) : UserDetailsService {
     @Transactional
-    override fun loadUserByUsername(username: String?): UserDetails {
-        username ?: throw UsernameNotFoundException("Username is null")
-
+    override fun loadUserByUsername(username: String): UserDetails {
         val user = username
-            .let { userRepository.findByName(it) }
+            .let { userRepository.findByLogin(it) }
             ?: throw UsernameNotFoundException("Username $username not found")
 
         return CustomUserDetails(user)
     }
 
     @Transactional
-    fun createUser(user: UserAuthDto): TokenSessionResponseDto { // todo: can be parallel
+    fun createUser(user: UserAuthDto): TokenPairResponseDto { // todo: can be parallel
         if (userRepository.findByLogin(user.login) != null) {
             throw UserAvailableException("User with login ${user.login} already exists")
         }
@@ -48,19 +49,30 @@ class UserService(
 
         newUser = userRepository.save(newUser)
 
-        val tokenRefresh = jwtRefreshService.generateToken()
-        val tokenAccess = jwtAccessService.generateToken(newUser)
+        val newTokenPair = getTokenPair(newUser)
 
-        val newTokenPair = TokenPairEntity(
-            tokenRefresh = tokenRefresh,
-            tokenAccess = tokenAccess,
-        )
-
-        return TokenSessionResponseDto(
+        return TokenPairResponseDto(
             tokenRefresh = newTokenPair.tokenRefresh,
             tokenAccess = newTokenPair.tokenAccess,
         )
     }
 
+    @Transactional
+    fun updateUser(user: UserAuthDto): TokenPairResponseDto {
+        val userFromDb = userRepository.findByLogin(user.login)
+            ?: throw UserNotFoundException("User with login ${user.login} not found")
 
+        val newTokenPair = getTokenPair(userFromDb)
+
+        return TokenPairResponseDto(
+            tokenRefresh = newTokenPair.tokenRefresh,
+            tokenAccess = newTokenPair.tokenAccess,
+        )
+    }
+
+    private fun <T> getTokenPair(user: T) where T : ILogin, T : ISubscriptionLevel =
+        TokenPairEntity(
+            tokenRefresh = jwtRefreshService.generateToken(),
+            tokenAccess = jwtAccessService.generateToken(user),
+        )
 }

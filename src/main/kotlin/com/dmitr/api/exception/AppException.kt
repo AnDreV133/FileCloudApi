@@ -1,18 +1,15 @@
 package com.dmitr.api.exception
 
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.ResponseStatus
 
-sealed class AppException(message: String) : RuntimeException(message)
+sealed class AppException(
+    val statusCode: HttpStatus,
+    override val message: String,
+) : RuntimeException("${statusCode.value()}: $message")
 
-@ResponseStatus(value = HttpStatus.CONFLICT, reason = "User is already exists")
-class UserAvailableException(message: String = "") : AppException(message)
-@ResponseStatus(value = HttpStatus.UNAUTHORIZED, reason = "User has not token")
-class NoTokenFoundException(message: String = "") : AppException(message)
-@ResponseStatus(value = HttpStatus.FORBIDDEN, reason = "Refresh token expired")
-class TokenRefreshExpiredException(message: String = "") : AppException(message)
-@ResponseStatus(value = HttpStatus.FORBIDDEN, reason = "Access token expired")
-class TokenAccessExpiredException(message: String = "") : AppException(message)
-
-@ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "signature token is invalid")
-class TokenBadSignatureException(message: String = "") : AppException(message)
+class UserAvailableException(login: String = "") : AppException(HttpStatus.CONFLICT, "User ($login) is already exists")
+class UserNotFoundException(login: String = "") : AppException(HttpStatus.NOT_FOUND, "User ($login) is not found")
+class NoTokenFoundException : AppException(HttpStatus.UNAUTHORIZED, "User has not token")
+class TokenRefreshExpiredException : AppException(HttpStatus.FORBIDDEN, "Refresh token expired")
+class TokenAccessExpiredException : AppException(HttpStatus.FORBIDDEN, "Access token expired")
+class TokenBadSignatureException : AppException(HttpStatus.BAD_REQUEST, "signature token is invalid")

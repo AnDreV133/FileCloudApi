@@ -32,16 +32,15 @@ class JwtRequestFilter(
             if (authHeader?.startsWith("Bearer ") == true)
                 authHeader.substring("Bearer ".length)
             else
-                throw NoTokenFoundException("No got token")
+                throw NoTokenFoundException()
 
         if (jwtAccessService.validateToken(tokenAccess).not())
-            throw TokenAccessExpiredException("Access token expired")
-
+            throw TokenAccessExpiredException()
 
         val login = try {
             jwtAccessService.getLogin(tokenAccess)
         } catch (e: SignatureException) {
-            throw TokenBadSignatureException("Token bad signature")
+            throw TokenBadSignatureException()
         }
 
         SecurityContextHolder.getContext().let {
