@@ -24,9 +24,6 @@ class SecurityConfig(
     private var jwtRequestFilter: JwtRequestFilter,
     private val exceptionHandlingFilter: ExceptionHandlingFilter,
 ) {
-    @Value("\${server.servlet.context-path}")
-    private lateinit var contextPath: String
-
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain = http
         .csrf { it.disable() }
@@ -34,7 +31,7 @@ class SecurityConfig(
         .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
         .authenticationProvider(authenticationProvider())
         .authorizeHttpRequests {
-            it.requestMatchers("$contextPath/auth/**").permitAll()
+            it.requestMatchers("/auth/**").permitAll()
             it.anyRequest().authenticated()
         }
         .httpBasic(withDefaults())
