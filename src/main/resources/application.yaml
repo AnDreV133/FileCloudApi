@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: api
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create
+      # ddl-auto: update
+
+server:
+  servlet:
+    context-path: /api/v1
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+    com:
+      dmitr:
+        api: TRACE
+
+token:
+  refresh:
+    secret: ${JWT_REFRESH_KEY}
+    lifetime: 14d
+  access:
+    secret: ${JWT_ACCESS_KEY}
+    lifetime: 15m
