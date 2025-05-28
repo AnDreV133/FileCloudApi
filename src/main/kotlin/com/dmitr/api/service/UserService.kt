@@ -37,19 +37,21 @@ class UserService(
     @Transactional
     fun createUser(user: UserAuthDto): TokenPairResponseDto { // todo: can be parallel
         if (userRepository.findByLogin(user.login) != null) {
-            throw UserAvailableException("User with login ${user.login} already exists")
+            throw UserAvailableException(user.login)
         }
 
-        var newUser = UserEntity(
-            name = user.login,
-            login = user.login,
-            password = user.password,
-            subscriptionLevel = SubscriptionLevelEnum.STANDARD,
+        val newUser = userRepository.save(
+            UserEntity(
+                name = user.login,
+                login = user.login,
+                password = user.password,
+                subscriptionLevel = SubscriptionLevelEnum.STANDARD,
+            )
         )
 
-        newUser = userRepository.save(newUser)
-
-        val newTokenPair = getTokenPair(newUser)
+        val newTokenPair = tokenPairRepository.save(
+            getTokenPair(newUser)
+        )
 
         return TokenPairResponseDto(
             tokenRefresh = newTokenPair.tokenRefresh,
@@ -59,10 +61,12 @@ class UserService(
 
     @Transactional
     fun updateUser(user: UserAuthDto): TokenPairResponseDto {
-        val userFromDb = userRepository.findByLogin(user.login)
-            ?: throw UserNotFoundException("User with login ${user.login} not found")
+        val userFromDb = userRepository.findByLoginAndPassword(user.login, user.password)
+            ?: throw UserNotFoundException(user.login)
 
-        val newTokenPair = getTokenPair(userFromDb)
+        val newTokenPair = tokenPairRepository.save(
+            getTokenPair(userFromDb)
+        )
 
         return TokenPairResponseDto(
             tokenRefresh = newTokenPair.tokenRefresh,

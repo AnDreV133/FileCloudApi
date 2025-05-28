@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface UserRepository : CrudRepository<UserEntity, Long> {
-    abstract fun findByName(name: String): UserEntity?
-    abstract fun findByLogin(login: String): UserEntity?
-
+    fun findByName(name: String): UserEntity?
+    fun findByLogin(login: String): UserEntity?
+    fun findByLoginAndPassword(login: String, password: String): UserEntity?
 }
