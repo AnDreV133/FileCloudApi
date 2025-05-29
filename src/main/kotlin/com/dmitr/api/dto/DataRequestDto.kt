@@ -5,5 +5,4 @@ import java.io.Serializable
 
 data class DataRequestDto(
     val name: String,
-    override val session: String
-) : Serializable, ISession
+) : Serializable

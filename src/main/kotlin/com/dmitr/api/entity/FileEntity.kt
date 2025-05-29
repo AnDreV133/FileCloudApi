@@ -10,7 +10,8 @@ class FileEntity(
     @ManyToOne
     val user: UserEntity,
     val name: String,
-    val size: Int,
+    val extension: String,
+    val length: Int,
     @Lob
-    val blob: ByteArray
+    val blobData: ByteArray
 )

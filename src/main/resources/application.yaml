@@ -6,6 +6,8 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+#    initialization-mode: always
+#    data: classpath:testdata.sql
   jpa:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
