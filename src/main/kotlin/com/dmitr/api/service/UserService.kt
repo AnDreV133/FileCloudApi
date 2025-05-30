@@ -22,8 +22,7 @@ import org.springframework.stereotype.Service
 class UserService(
     private val userRepository: UserRepository,
     private val tokenPairRepository: TokenPairRepository,
-    private val jwtRefreshService: JwtRefreshService,
-    private val jwtAccessService: JwtAccessService,
+    private val jwtService: JwtService,
 ) : UserDetailsService {
     @Transactional
     override fun loadUserByUsername(username: String): UserDetails {
@@ -76,7 +75,7 @@ class UserService(
 
     private fun <T> getTokenPair(user: T) where T : ILogin, T : ISubscriptionLevel =
         TokenPairEntity(
-            tokenRefresh = jwtRefreshService.generateToken(),
-            tokenAccess = jwtAccessService.generateToken(user),
+            tokenRefresh = jwtService.generateRefreshToken(),
+            tokenAccess = jwtService.generateAccessToken(user),
         )
 }
