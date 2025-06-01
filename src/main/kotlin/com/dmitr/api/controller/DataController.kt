@@ -1,5 +1,6 @@
 package com.dmitr.api.controller
 
+import com.dmitr.api.dto.DataChangeRequestDto
 import com.dmitr.api.dto.DataRequestDto
 import com.dmitr.api.dto.DataResponseDto
 import com.dmitr.api.service.DataService
@@ -34,7 +35,7 @@ class DataController(
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun save(
         @RequestParam file: MultipartFile,
-        @RequestParam filename: String
+        @RequestParam filename: String,
     ): ResponseEntity<DataResponseDto> {
         val request = DataRequestDto(
             fullName = filename,
@@ -43,15 +44,19 @@ class DataController(
         val resultOfSave = dataService.saveData(request, login)
 
         return ResponseEntity(resultOfSave, HttpStatus.OK)
-    }
+    } // blob = null
 
     @PutMapping("/{uuid}")
-    fun update(data: Nothing) {
+    fun update(@PathVariable uuid: String, @RequestBody data: DataChangeRequestDto): ResponseEntity<DataResponseDto> {
+        val resultOfSave = dataService.updateData(uuid, data, login)
 
-    }
+        return ResponseEntity(resultOfSave, HttpStatus.OK)
+    } // blob = null
 
-    @DeleteMapping("/{id}")
-    fun delete() {
+    @DeleteMapping("/{uuid}")
+    fun delete(@PathVariable uuid: String): ResponseEntity<Boolean> {
+        val resultOfDelete = dataService.deleteData(uuid, login)
 
+        return ResponseEntity(resultOfDelete, HttpStatus.OK)
     }
 }

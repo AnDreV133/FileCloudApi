@@ -1,9 +1,10 @@
 package com.dmitr.api.service
 
+import com.dmitr.api.dto.DataChangeRequestDto
 import com.dmitr.api.dto.DataRequestDto
 import com.dmitr.api.dto.DataResponseDto
 import com.dmitr.api.entity.DataEntity
-import com.dmitr.api.entity.UserEntity
+import com.dmitr.api.exception.FileNotFoundException
 import com.dmitr.api.exception.FileUnsavedException
 import com.dmitr.api.exception.FilenameEqualException
 import com.dmitr.api.exception.UserNotFoundException
@@ -29,16 +30,24 @@ class DataService(
 
     fun saveData(data: DataRequestDto, login: String): DataResponseDto {
         val user = userRepository.findByLogin(login) ?: throw UserNotFoundException()
-        val dataEntity = data.toEntity(user)
+        val fileNameParts = data.fullName.toFilenameParts()
         val hasEqualFilename = dataRepository.findByUserAndNameAndExtension(
             user,
-            dataEntity.name,
-            dataEntity.extension
+            fileNameParts.first,
+            fileNameParts.second,
         )
 
         if (hasEqualFilename) {
             throw FilenameEqualException()
         }
+
+        val dataEntity = DataEntity(
+            name = fileNameParts.first,
+            extension = fileNameParts.second,
+            length = data.blob.size.toLong(),
+            blobData = data.blob,
+            user = user
+        )
 
         return try {
             dataRepository.save(dataEntity)
@@ -47,17 +56,43 @@ class DataService(
         }.toResponseDto()
     }
 
-    private fun DataRequestDto.toEntity(user: UserEntity) = DataEntity(
-        name = fullName.substringBeforeLast("."),
-        extension = fullName.substringAfterLast("."),
-        length = blob.size.toLong(),
-        blobData = blob,
-        user = user
-    )
+    fun updateData(uuid: String, data: DataChangeRequestDto, login: String): DataResponseDto {
+        val user = userRepository.findByLogin(login) ?: throw UserNotFoundException()
+        val fileNameParts = data.fullName.toFilenameParts()
+        val hasEqualFilename = dataRepository.findByUserAndNameAndExtension(
+            user,
+            fileNameParts.first,
+            fileNameParts.second,
+        )
 
-    private fun DataEntity.toResponseDto() = (this as DataHeaderProjection)
-        .toResponseDto()
-        .copy(blob = blobData)
+        if (hasEqualFilename) {
+            throw FilenameEqualException()
+        }
+
+        val oldDataEntity = dataRepository.findByUserAndUuid(user, uuid) ?: throw FileNotFoundException()
+
+        val newDataEntity = DataEntity(
+            name = fileNameParts.first,
+            extension = fileNameParts.second,
+            length = oldDataEntity.length,
+            blobData = oldDataEntity.blobData,
+            user = oldDataEntity.user
+        )
+
+        return try {
+            dataRepository.save(newDataEntity)
+        } catch (e: Exception) {
+            throw FileUnsavedException()
+        }.toResponseDto()
+    }
+
+    fun deleteData(uuid: String, login: String): Boolean {
+        val user = userRepository.findByLogin(login) ?: throw UserNotFoundException()
+
+        val amountRemovedData = dataRepository.deleteByUserAndUuid(user, uuid)
+
+        return amountRemovedData != 0
+    }
 
     private fun DataHeaderProjection.toResponseDto() = DataResponseDto(
         uuid = uuid,
@@ -65,4 +100,8 @@ class DataService(
         extension = extension,
         size = length
     )
+
+    private fun String.toFilenameParts(): Pair<String, String> {
+        return substringBeforeLast(".") to substringAfterLast(".")
+    }
 }

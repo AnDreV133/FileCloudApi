@@ -1,32 +1,27 @@
 package com.dmitr.api
 
-import com.dmitr.api.config.SecurityConfig
 import com.dmitr.api.controller.DataController
+import com.dmitr.api.dto.DataChangeRequestDto
 import com.dmitr.api.dto.DataRequestDto
 import com.dmitr.api.dto.DataResponseDto
 import com.dmitr.api.entity.SubscriptionLevelEnum
 import com.dmitr.api.entity.UserEntity
 import com.dmitr.api.service.DataService
 import com.dmitr.api.service.JwtService
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
-import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.web.context.WebApplicationContext
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import java.util.*
 
 
@@ -34,6 +29,9 @@ import java.util.*
 class DataControllerTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     @MockBean
     private lateinit var jwtService: JwtService
@@ -114,7 +112,72 @@ class DataControllerTest {
             .andExpect(jsonPath("$.blob").value("Y29udGVudA==")) // base64 of "content"
     }
 
+    @Test
+    @WithMockUser(TEST_LOGIN)
+    fun `update should return 200 and updated data`() {
+        val uuid = UUID.randomUUID().toString()
+        val updateRequest = DataChangeRequestDto(
+            fullName = "updated.txt",
+        )
+        val updatedData = DataResponseDto(
+            uuid = uuid,
+            name = "updated",
+            extension = "txt",
+            size = 1024L,
+            blob = null
+        )
+
+        `when`(dataService.updateData(uuid, updateRequest, TEST_LOGIN)).thenReturn(updatedData)
+
+        mockMvc.perform(
+            put("/data/$uuid")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest))
+                .header("Authorization", "Bearer $accessToken")
+                .with(csrf())
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.uuid").value(uuid))
+            .andExpect(jsonPath("$.name").value("updated"))
+            .andExpect(jsonPath("$.extension").value("txt"))
+            .andExpect(jsonPath("$.blob").doesNotExist())
+    }
+
+    @Test
+    @WithMockUser(TEST_LOGIN)
+    fun `delete should return 200 and true when successful`() {
+        val uuid = UUID.randomUUID().toString()
+
+        `when`(dataService.deleteData(uuid, TEST_LOGIN)).thenReturn(true)
+
+        mockMvc.perform(
+            delete("/data/$uuid")
+                .header("Authorization", "Bearer $accessToken")
+                .with(csrf())
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().string("true"))
+    }
+
+    @Test
+    @WithMockUser(TEST_LOGIN)
+    fun `delete should return 200 and false when failed`() {
+        val uuid = UUID.randomUUID().toString()
+
+        `when`(dataService.deleteData(uuid, TEST_LOGIN)).thenReturn(false)
+
+        mockMvc.perform(
+            delete("/data/$uuid")
+                .header("Authorization", "Bearer $accessToken")
+                .with(csrf())
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().string("false"))
+    }
+
     companion object {
         private const val TEST_LOGIN = "l"
     }
 }
+
+// todo maybe remove with(csrf()), because its crutch

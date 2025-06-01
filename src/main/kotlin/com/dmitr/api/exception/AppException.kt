@@ -15,3 +15,4 @@ class TokenAccessExpiredException : AppException(HttpStatus.FORBIDDEN, "Access t
 class TokenBadSignatureException : AppException(HttpStatus.BAD_REQUEST, "signature token is invalid")
 class FilenameEqualException: AppException(HttpStatus.CONFLICT, "Filename is equal")
 class FileUnsavedException: AppException(HttpStatus.BAD_REQUEST, "File is not saved")
+class FileNotFoundException: AppException(HttpStatus.NOT_FOUND, "File is not found")

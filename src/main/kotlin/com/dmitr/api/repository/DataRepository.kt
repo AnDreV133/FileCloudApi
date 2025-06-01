@@ -11,4 +11,6 @@ interface DataRepository : CrudRepository<DataEntity, Long> {
     fun getByUser(user: UserEntity): List<DataHeaderProjection>
     fun getByUserAndUuid(user: UserEntity, uuid: String): DataEntity?
     fun findByUserAndNameAndExtension(user: UserEntity, name: String, extension: String): Boolean
+    fun findByUserAndUuid(user: UserEntity, uuid: String): DataEntity?
+    fun deleteByUserAndUuid(user: UserEntity, uuid: String): Int
 }
