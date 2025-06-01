@@ -1,8 +1,8 @@
 package com.dmitr.api.dto
 
-import com.dmitr.api.declaration.ISession
 import java.io.Serializable
 
 data class DataRequestDto(
-    val name: String,
+    val fullName: String,
+    val blob: ByteArray,
 ) : Serializable

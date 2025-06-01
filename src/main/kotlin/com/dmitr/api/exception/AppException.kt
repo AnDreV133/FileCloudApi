@@ -13,3 +13,5 @@ class NoTokenFoundException : AppException(HttpStatus.UNAUTHORIZED, "User has no
 class TokenRefreshExpiredException : AppException(HttpStatus.FORBIDDEN, "Refresh token expired")
 class TokenAccessExpiredException : AppException(HttpStatus.FORBIDDEN, "Access token expired")
 class TokenBadSignatureException : AppException(HttpStatus.BAD_REQUEST, "signature token is invalid")
+class FilenameEqualException: AppException(HttpStatus.CONFLICT, "Filename is equal")
+class FileUnsavedException: AppException(HttpStatus.BAD_REQUEST, "File is not saved")
