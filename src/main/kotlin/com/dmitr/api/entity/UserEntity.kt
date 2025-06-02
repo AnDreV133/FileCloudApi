@@ -14,5 +14,8 @@ class UserEntity(
     val name: String,
     override val password: String,
     @Enumerated(EnumType.STRING)
-    override val subscriptionLevel: SubscriptionLevelEnum
+    override val subscriptionLevel: SubscriptionLevelEnum,
+
+    @OneToMany(cascade = [CascadeType.REMOVE])
+    val data: List<DataEntity> = emptyList()
 ) : ILogin, IPassword, ISubscriptionLevel

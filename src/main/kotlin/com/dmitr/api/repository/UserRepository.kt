@@ -9,4 +9,5 @@ interface UserRepository : CrudRepository<UserEntity, Long> {
     fun findByName(name: String): UserEntity?
     fun findByLogin(login: String): UserEntity?
     fun findByLoginAndPassword(login: String, password: String): UserEntity?
+    fun deleteByLogin(login: String)
 }

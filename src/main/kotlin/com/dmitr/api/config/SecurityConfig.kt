@@ -1,7 +1,6 @@
 package com.dmitr.api.config
 
-import com.dmitr.api.service.UserService
-import org.springframework.beans.factory.annotation.Value
+import com.dmitr.api.service.LoginService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -20,7 +19,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter
 @Configuration
 @EnableMethodSecurity
 class SecurityConfig(
-    private var userService: UserService,
+    private var loginService: LoginService,
     private var jwtRequestFilter: JwtRequestFilter,
     private val exceptionHandlingFilter: ExceptionHandlingFilter,
 ) {
@@ -42,7 +41,7 @@ class SecurityConfig(
     fun authenticationProvider(): AuthenticationProvider =
         DaoAuthenticationProvider().apply {
             setPasswordEncoder(passwordEncoder())
-            setUserDetailsService(userService)
+            setUserDetailsService(loginService)
         }
 
     @Bean
