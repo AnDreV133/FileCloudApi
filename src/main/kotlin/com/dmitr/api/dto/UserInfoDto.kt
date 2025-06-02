@@ -9,5 +9,4 @@ data class UserInfoDto(
     val name: String,
     override val login: String,
     override val subscriptionLevel: SubscriptionLevelEnum,
-) : Serializable, ILogin, ISubscriptionLevel {
-}
+) : Serializable, ILogin, ISubscriptionLevel
