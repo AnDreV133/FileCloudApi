@@ -27,4 +27,10 @@ class AuthController(
         val tokenPair = userService.updateUser(user)
         return ResponseEntity(tokenPair, HttpStatus.ACCEPTED)
     }
+
+    @PostMapping("/new-token")
+    fun refreshToken(@RequestBody refreshToken: String): ResponseEntity<String> {
+        val newAccessToken = userService.getNewAccessToken(refreshToken)
+        return ResponseEntity(newAccessToken, HttpStatus.ACCEPTED)
+    }
 }

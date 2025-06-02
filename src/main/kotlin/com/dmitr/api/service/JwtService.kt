@@ -3,7 +3,6 @@ package com.dmitr.api.service
 import com.dmitr.api.declaration.ILogin
 import com.dmitr.api.declaration.ISubscriptionLevel
 import io.jsonwebtoken.Claims
-import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -52,20 +51,27 @@ class JwtService {
             .compact()
     }
 
-    fun generateRefreshToken(): String {
+    fun <T> generateRefreshToken(user: T): String where T : ILogin {
         val issuedDate = Date()
         val expiredDate = Date(issuedDate.time + refreshLifetime.toMillis())
+        val claims = mutableMapOf<String, Any>().also {
+            it[LOGIN_KEY] = user.login
+        }
 
         return Jwts.builder()
-            .subject(UUID.randomUUID().toString())
+            .claims(claims)
             .issuedAt(issuedDate)
             .expiration(expiredDate)
             .signWith(getSecretKey(refreshSecret))
             .compact()
     }
 
-    fun getLogin(token: String): String {
+    fun getLoginFromAccessToken(token: String): String {
         return getAllClaimsFromToken(token, accessSecret).subject
+    }
+
+    fun getLoginFromRefreshToken(token: String): String {
+        return getAllClaimsFromToken(token, accessSecret).get(LOGIN_KEY, String::class.java)
     }
 
     fun getSubscriptionLevel(token: String): String {
@@ -90,6 +96,7 @@ class JwtService {
 
     private companion object {
         const val SUBSCRIPTION_LEVEL_KEY = "subscriptionLevel"
+        const val LOGIN_KEY = "login"
         const val ALGORITHM_SPEC = "HmacSHA256"
     }
 

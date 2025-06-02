@@ -47,7 +47,7 @@ class DataControllerTest {
 
         accessToken = "access_token"
         `when`(jwtService.generateAccessToken(mockUser)).thenReturn(accessToken)
-        `when`(jwtService.getLogin(accessToken)).thenReturn(TEST_LOGIN)
+        `when`(jwtService.getLoginFromAccessToken(accessToken)).thenReturn(TEST_LOGIN)
     }
 
     @Test

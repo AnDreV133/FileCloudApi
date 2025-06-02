@@ -5,13 +5,13 @@ import com.dmitr.api.declaration.ISubscriptionLevel
 import com.dmitr.api.dto.TokenPairResponseDto
 import com.dmitr.api.dto.UserAuthDto
 import com.dmitr.api.entity.SubscriptionLevelEnum
-import com.dmitr.api.entity.TokenPairEntity
 import com.dmitr.api.entity.UserEntity
+import com.dmitr.api.exception.TokenRefreshExpiredException
 import com.dmitr.api.exception.UserAvailableException
 import com.dmitr.api.exception.UserNotFoundException
-import com.dmitr.api.repository.TokenPairRepository
 import com.dmitr.api.repository.UserRepository
 import com.dmitr.api.util.CustomUserDetails
+import io.jsonwebtoken.JwtException
 import jakarta.transaction.Transactional
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service
 @Service
 class UserService(
     private val userRepository: UserRepository,
-    private val tokenPairRepository: TokenPairRepository,
     private val jwtService: JwtService,
 ) : UserDetailsService {
     @Transactional
@@ -48,9 +47,7 @@ class UserService(
             )
         )
 
-        val newTokenPair = tokenPairRepository.save(
-            getTokenPair(newUser)
-        )
+        val newTokenPair = getTokenPair(newUser)
 
         return TokenPairResponseDto(
             tokenRefresh = newTokenPair.tokenRefresh,
@@ -63,9 +60,7 @@ class UserService(
         val userFromDb = userRepository.findByLoginAndPassword(user.login, user.password)
             ?: throw UserNotFoundException(user.login)
 
-        val newTokenPair = tokenPairRepository.save(
-            getTokenPair(userFromDb)
-        )
+        val newTokenPair = getTokenPair(userFromDb)
 
         return TokenPairResponseDto(
             tokenRefresh = newTokenPair.tokenRefresh,
@@ -73,9 +68,23 @@ class UserService(
         )
     }
 
+    @Transactional
+    fun getNewAccessToken(refreshToken: String): String {
+        val login = try {
+            jwtService.getLoginFromAccessToken(refreshToken)
+        } catch (e: JwtException) {
+            throw TokenRefreshExpiredException()
+        }
+
+        val user = userRepository.findByLogin(login)
+            ?: throw UserNotFoundException(login)
+
+        return jwtService.generateAccessToken(user)
+    }
+
     private fun <T> getTokenPair(user: T) where T : ILogin, T : ISubscriptionLevel =
-        TokenPairEntity(
-            tokenRefresh = jwtService.generateRefreshToken(),
+        TokenPairResponseDto(
+            tokenRefresh = jwtService.generateRefreshToken(user),
             tokenAccess = jwtService.generateAccessToken(user),
         )
 }

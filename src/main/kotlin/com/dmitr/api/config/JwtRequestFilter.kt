@@ -36,7 +36,7 @@ class JwtRequestFilter(
                 throw NoTokenFoundException()
 
         val login = try {
-            jwtService.getLogin(tokenAccess)
+            jwtService.getLoginFromAccessToken(tokenAccess)
         } catch (e: JwtException) {
             throw TokenAccessExpiredException()
         } catch (e: SignatureException) {
