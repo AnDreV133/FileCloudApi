@@ -31,7 +31,7 @@ class DataService(
     fun saveData(data: DataRequestDto, login: String): DataResponseDto {
         val user = userRepository.findByLogin(login) ?: throw UserNotFoundException()
         val fileExtension = data.filename.getFileExtension()
-        val hasEqualFilename = dataRepository.existsByUserAndNameAndExtension(
+        val hasEqualFilename = dataRepository.existsByUserAndFilenameAndExtension(
             user,
             data.filename,
             fileExtension
@@ -59,7 +59,7 @@ class DataService(
     fun updateData(uuid: String, data: DataChangeRequestDto, login: String): DataResponseDto {
         val user = userRepository.findByLogin(login) ?: throw UserNotFoundException()
         val fileExtension = data.filename.getFileExtension()
-        val hasEqualFilename = dataRepository.existsByUserAndNameAndExtension(
+        val hasEqualFilename = dataRepository.existsByUserAndFilenameAndExtension(
             user,
             data.filename,
             fileExtension,
