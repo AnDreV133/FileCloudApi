@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional
 class UserService(
     private val userRepository: UserRepository,
 ) {
+    @Transactional
     fun getInfo(login: String): UserInfoDto {
         return userRepository.findByLogin(login)?.toUserInfoDto()
             ?: throw UserNotFoundException()

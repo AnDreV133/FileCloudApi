@@ -7,5 +7,4 @@ data class DataResponseDto(
     val filename: String,
     val extension: String,
     val size: Long,
-    val blob: ByteArray? = null
 ) : Serializable

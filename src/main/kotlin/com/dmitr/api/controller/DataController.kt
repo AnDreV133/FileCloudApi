@@ -6,11 +6,14 @@ import com.dmitr.api.dto.DataResponseDto
 import com.dmitr.api.service.DataService
 import com.dmitr.api.util.getUserLoginFromSecurityContext
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.FileSystemResource
+import org.springframework.core.io.Resource
+import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import java.io.File
+import java.nio.charset.StandardCharsets
 
 @RestController
 @RequestMapping("/data")
@@ -22,17 +25,30 @@ class DataController(
     private val logger = LoggerFactory.getLogger(DataController::class.java)
 
     @GetMapping
-    fun getDataHeaders(): ResponseEntity<List<DataResponseDto>> {
+    fun getDataList(): ResponseEntity<List<DataResponseDto>> {
         val headers = dataService.getAllDataHeaders(login)
         logger.info("Getting data headers for user: $login")
         return ResponseEntity(headers, HttpStatus.OK)
     }
 
     @GetMapping("/{uuid}")
-    fun getDataByUuid(@PathVariable uuid: String): ResponseEntity<DataResponseDto> {
-        val data = dataService.getData(login, uuid)
+    fun getFileByUuid(@PathVariable uuid: String): ResponseEntity<Resource> {
+        val data = dataService.getData(login, uuid) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+
+        val resource: Resource = ByteArrayResource(data.blobData)
+        val headers = HttpHeaders().apply {
+            contentLength = data.length
+            contentType = MediaType.APPLICATION_OCTET_STREAM
+            contentDisposition = ContentDisposition.attachment()
+                .filename(data.filename, StandardCharsets.UTF_8)
+                .build()
+        }
+
         logger.info("Getting data by uuid: $uuid")
-        return ResponseEntity(data, HttpStatus.OK)
+        return ResponseEntity
+            .ok()
+            .headers(headers)
+            .body(resource)
     }
 
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
