@@ -117,11 +117,11 @@ class DataControllerTest {
     fun `update should return 200 and updated data`() {
         val uuid = UUID.randomUUID().toString()
         val updateRequest = DataChangeRequestDto(
-            fullName = "updated.txt",
+            filename = "updated.txt",
         )
         val updatedData = DataResponseDto(
             uuid = uuid,
-            name = "updated",
+            filename = "updated",
             extension = "txt",
             size = 1024L,
             blob = null

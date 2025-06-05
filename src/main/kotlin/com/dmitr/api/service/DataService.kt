@@ -30,11 +30,11 @@ class DataService(
 
     fun saveData(data: DataRequestDto, login: String): DataResponseDto {
         val user = userRepository.findByLogin(login) ?: throw UserNotFoundException()
-        val fileNameParts = data.fullName.toFilenameParts()
-        val hasEqualFilename = dataRepository.findByUserAndNameAndExtension(
+        val fileExtension = data.filename.getFileExtension()
+        val hasEqualFilename = dataRepository.existsByUserAndNameAndExtension(
             user,
-            fileNameParts.first,
-            fileNameParts.second,
+            data.filename,
+            fileExtension
         )
 
         if (hasEqualFilename) {
@@ -42,8 +42,8 @@ class DataService(
         }
 
         val dataEntity = DataEntity(
-            name = fileNameParts.first,
-            extension = fileNameParts.second,
+            filename = data.filename,
+            extension = fileExtension,
             length = data.blob.size.toLong(),
             blobData = data.blob,
             user = user
@@ -58,11 +58,11 @@ class DataService(
 
     fun updateData(uuid: String, data: DataChangeRequestDto, login: String): DataResponseDto {
         val user = userRepository.findByLogin(login) ?: throw UserNotFoundException()
-        val fileNameParts = data.fullName.toFilenameParts()
-        val hasEqualFilename = dataRepository.findByUserAndNameAndExtension(
+        val fileExtension = data.filename.getFileExtension()
+        val hasEqualFilename = dataRepository.existsByUserAndNameAndExtension(
             user,
-            fileNameParts.first,
-            fileNameParts.second,
+            data.filename,
+            fileExtension,
         )
 
         if (hasEqualFilename) {
@@ -72,8 +72,8 @@ class DataService(
         val oldDataEntity = dataRepository.findByUserAndUuid(user, uuid) ?: throw FileNotFoundException()
 
         val newDataEntity = DataEntity(
-            name = fileNameParts.first,
-            extension = fileNameParts.second,
+            filename = data.filename,
+            extension = fileExtension,
             length = oldDataEntity.length,
             blobData = oldDataEntity.blobData,
             user = oldDataEntity.user
@@ -96,12 +96,12 @@ class DataService(
 
     private fun DataHeaderProjection.toResponseDto() = DataResponseDto(
         uuid = uuid,
-        name = name,
+        filename = filename,
         extension = extension,
         size = length
     )
 
-    private fun String.toFilenameParts(): Pair<String, String> {
-        return substringBeforeLast(".") to substringAfterLast(".")
+    private fun String.getFileExtension(): String {
+        return substringAfterLast(".")
     }
 }

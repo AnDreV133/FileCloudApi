@@ -11,7 +11,7 @@ class DataEntity(
     override val uuid: String = "",
     @ManyToOne
     override val user: UserEntity,
-    override val name: String,
+    override val filename: String,
     override val extension: String,
     override val length: Long,
     @Lob
