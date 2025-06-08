@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository
 interface DataRepository : CrudRepository<DataEntity, Long> {
     fun getByUser(user: UserEntity): List<DataHeaderProjection>
     fun getByUserAndUuid(user: UserEntity, uuid: String): DataEntity?
-    fun existsByUserAndFilenameAndExtension(user: UserEntity, filename: String, extension: String): Boolean
+    fun existsByUserAndFilename(user: UserEntity, filename: String): Boolean
     fun findByUserAndUuid(user: UserEntity, uuid: String): DataEntity?
     fun deleteByUserAndUuid(user: UserEntity, uuid: String): Int
 }

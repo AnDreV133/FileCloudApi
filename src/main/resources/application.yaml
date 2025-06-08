@@ -48,4 +48,4 @@ token:
     lifetime: 14d
   access:
     secret: ${JWT_ACCESS_KEY}
-    lifetime: 15m
+    lifetime: 1m

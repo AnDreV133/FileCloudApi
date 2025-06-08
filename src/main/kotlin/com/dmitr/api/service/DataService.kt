@@ -10,13 +10,8 @@ import com.dmitr.api.exception.FilenameEqualException
 import com.dmitr.api.exception.UserNotFoundException
 import com.dmitr.api.repository.DataRepository
 import com.dmitr.api.repository.UserRepository
-import org.springframework.core.io.FileSystemResource
-import org.springframework.core.io.Resource
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.io.File
 
 
 @Service
@@ -47,10 +42,9 @@ class DataService(
     fun saveData(data: DataRequestDto, login: String): DataResponseDto {
         val user = userRepository.findByLogin(login) ?: throw UserNotFoundException()
         val fileExtension = data.filename.getFileExtension()
-        val hasEqualFilename = dataRepository.existsByUserAndFilenameAndExtension(
+        val hasEqualFilename = dataRepository.existsByUserAndFilename(
             user,
-            data.filename,
-            fileExtension
+            data.filename
         )
 
         if (hasEqualFilename) {
@@ -83,10 +77,9 @@ class DataService(
     fun updateData(uuid: String, data: DataChangeRequestDto, login: String): DataResponseDto {
         val user = userRepository.findByLogin(login) ?: throw UserNotFoundException()
         val fileExtension = data.filename.getFileExtension()
-        val hasEqualFilename = dataRepository.existsByUserAndFilenameAndExtension(
+        val hasEqualFilename = dataRepository.existsByUserAndFilename(
             user,
-            data.filename,
-            fileExtension,
+            data.filename
         )
 
         if (hasEqualFilename) {
