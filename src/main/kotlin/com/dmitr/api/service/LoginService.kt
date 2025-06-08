@@ -71,7 +71,7 @@ class LoginService(
     @Transactional
     fun getNewAccessToken(refreshToken: String): String {
         val login = try {
-            jwtService.getLoginFromAccessToken(refreshToken)
+            jwtService.getLoginFromRefreshToken(refreshToken)
         } catch (e: JwtException) {
             throw TokenRefreshExpiredException()
         }

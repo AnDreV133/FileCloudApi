@@ -71,7 +71,7 @@ class JwtService {
     }
 
     fun getLoginFromRefreshToken(token: String): String {
-        return getAllClaimsFromToken(token, accessSecret).get(LOGIN_KEY, String::class.java)
+        return getAllClaimsFromToken(token, refreshSecret).get(LOGIN_KEY, String::class.java)
     }
 
     fun getSubscriptionLevel(token: String): String {
